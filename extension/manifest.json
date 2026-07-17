@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "LifeOS Brain Clipper",
+  "version": "1.0",
+  "description": "Clip web pages, URLs, and snippets directly into your LifeOS AI Personal Digital Brain.",
+  "permissions": [
+    "activeTab"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
