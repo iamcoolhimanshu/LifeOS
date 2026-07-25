@@ -1,10 +1,12 @@
 package com.lifeos.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_configurations")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserConfiguration {
 
     @Id

@@ -157,25 +157,25 @@ export const Calendar: React.FC = () => {
       <GlassCard className="p-6">
         {/* Month Selector Bar */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-md font-bold text-slate-850 dark:text-slate-100 flex items-center gap-2">
+          <h2 className="text-md font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             {monthName} <span className="text-slate-400 dark:text-slate-500 font-normal">{year}</span>
           </h2>
           <div className="flex items-center gap-2">
             <button 
               onClick={prevMonth}
-              className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900 transition"
+              className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition"
             >
               <ChevronLeft size={16} />
             </button>
             <button 
               onClick={() => setCurrentDate(new Date())}
-              className="px-3 py-1.5 text-[10px] font-bold rounded-lg border border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900 transition uppercase tracking-wider"
+              className="px-3 py-1.5 text-[10px] font-bold rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition uppercase tracking-wider"
             >
               Today
             </button>
             <button 
               onClick={nextMonth}
-              className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900 transition"
+              className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition"
             >
               <ChevronRight size={16} />
             </button>
@@ -205,7 +205,7 @@ export const Calendar: React.FC = () => {
                 onClick={() => openNewEventModal(dayItem.date)}
                 className={`min-h-[90px] p-2 rounded-xl border flex flex-col justify-between transition cursor-pointer group ${
                   dayItem.isCurrentMonth
-                    ? 'border-slate-200 dark:border-slate-850 bg-slate-50/30 dark:bg-slate-900/10 hover:bg-slate-100/50 dark:hover:bg-slate-900/40'
+                    ? 'border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/10 hover:bg-slate-100/50 dark:hover:bg-slate-900/40'
                     : 'border-slate-100 dark:border-slate-900 bg-transparent text-slate-400 dark:text-slate-600 opacity-40'
                 } ${isToday ? 'ring-1 ring-purple-500' : ''}`}
               >
@@ -225,7 +225,7 @@ export const Calendar: React.FC = () => {
                       key={event.id}
                       onClick={() => openEditEventModal(event)}
                       style={{ borderLeftColor: event.color }}
-                      className="text-[9px] font-semibold text-slate-700 dark:text-slate-350 p-1 rounded bg-slate-100 dark:bg-slate-800 border-l-2 hover:bg-slate-200 dark:hover:bg-slate-750 truncate transition"
+                      className="text-[9px] font-semibold text-slate-800 dark:text-slate-100 p-1.5 rounded bg-slate-100/80 dark:bg-slate-800/90 border-l-2 hover:bg-slate-200 dark:hover:bg-slate-700 truncate transition"
                     >
                       {event.title}
                     </div>
@@ -332,7 +332,7 @@ export const Calendar: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-850">
+              <div className="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-800">
                 {selectedEvent ? (
                   <button
                     type="button"

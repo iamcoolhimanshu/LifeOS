@@ -43,6 +43,13 @@ public class AIService {
                     }
                 }
             }
+            // Fallback for background threads or single-tenant user sessions: inspect saved UserConfiguration
+            java.util.List<com.lifeos.api.model.UserConfiguration> configs = userConfigurationRepository.findAll();
+            for (com.lifeos.api.model.UserConfiguration cfg : configs) {
+                if (cfg.getEncryptedAiApiKey() != null && !cfg.getEncryptedAiApiKey().isEmpty()) {
+                    return encryptionService.decrypt(cfg.getEncryptedAiApiKey());
+                }
+            }
         } catch (Exception e) {
             logger.warn("Failed to dynamically resolve AI api key from user security context, falling back to application defaults: {}", e.getMessage());
         }
@@ -62,6 +69,13 @@ public class AIService {
                     if (config.getAiProvider() != null && !config.getAiProvider().isEmpty()) {
                         return config.getAiProvider();
                     }
+                }
+            }
+            // Fallback for background threads or single-tenant user sessions: inspect saved UserConfiguration
+            java.util.List<com.lifeos.api.model.UserConfiguration> configs = userConfigurationRepository.findAll();
+            for (com.lifeos.api.model.UserConfiguration cfg : configs) {
+                if (cfg.getAiProvider() != null && !cfg.getAiProvider().isEmpty()) {
+                    return cfg.getAiProvider();
                 }
             }
         } catch (Exception e) {

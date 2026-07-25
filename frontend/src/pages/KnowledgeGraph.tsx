@@ -180,13 +180,18 @@ export const KnowledgeGraph: React.FC = () => {
       ctx.scale(zoom, zoom);
       ctx.translate(-cx, -cy);
 
+      // Check dark mode state for dynamic theme coloring
+      const isDark = document.documentElement.classList.contains('dark');
+
       // Draw Links (lines)
-      ctx.lineWidth = 1;
+      ctx.lineWidth = isDark ? 1 : 1.5;
       for (const link of links) {
         const nodeA = nodes.find(n => n.id === link.source);
         const nodeB = nodes.find(n => n.id === link.target);
         if (nodeA && nodeB) {
-          ctx.strokeStyle = link.type === 'shared_tag' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(6, 182, 212, 0.25)';
+          ctx.strokeStyle = link.type === 'shared_tag' 
+            ? (isDark ? 'rgba(168, 85, 247, 0.4)' : 'rgba(147, 51, 234, 0.55)') 
+            : (isDark ? 'rgba(6, 182, 212, 0.4)' : 'rgba(8, 145, 178, 0.55)');
           ctx.beginPath();
           ctx.moveTo(nodeA.x, nodeA.y);
           ctx.lineTo(nodeB.x, nodeB.y);
@@ -213,18 +218,22 @@ export const KnowledgeGraph: React.FC = () => {
         ctx.fillStyle = color;
         ctx.fill();
 
-        // Neon Glow border overlay
+        // Border overlay adaptivity
         ctx.lineWidth = isSelected ? 3 : 1.5;
-        ctx.strokeStyle = isSelected ? '#ffffff' : (isHovered ? color : 'rgba(255, 255, 255, 0.3)');
+        ctx.strokeStyle = isSelected 
+          ? (isDark ? '#ffffff' : '#0f172a') 
+          : (isHovered ? color : (isDark ? 'rgba(255, 255, 255, 0.35)' : 'rgba(15, 23, 42, 0.3)'));
         ctx.shadowBlur = isHovered ? 12 : 0;
         ctx.shadowColor = color;
         ctx.stroke();
         ctx.shadowBlur = 0; // reset
 
-        // Label details on node hover or select
+        // Label details on node hover or select - high contrast text in light mode
         if (isHovered || isSelected || nodes.length < 15) {
-          ctx.fillStyle = isSelected ? '#ffffff' : 'rgba(255,255,255,0.85)';
-          ctx.font = 'bold 9px sans-serif';
+          ctx.fillStyle = isSelected 
+            ? (isDark ? '#ffffff' : '#0f172a') 
+            : (isDark ? 'rgba(255, 255, 255, 0.9)' : '#1e293b');
+          ctx.font = 'bold 10px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(node.label, node.x, node.y - node.radius - 6);
         }
@@ -361,7 +370,7 @@ export const KnowledgeGraph: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Canvas container */}
         <div ref={containerRef} className="lg:col-span-3 relative">
-          <GlassCard className="p-2 overflow-hidden border border-slate-200 dark:border-slate-850 bg-slate-50/20 dark:bg-slate-900/10">
+          <GlassCard className="p-2 overflow-hidden border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/10">
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm z-10">
                 <RefreshCw size={24} className="text-purple-500 animate-spin" />
@@ -380,21 +389,21 @@ export const KnowledgeGraph: React.FC = () => {
             <div className="absolute bottom-4 right-4 flex gap-2">
               <button
                 onClick={zoomIn}
-                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                 title="Zoom In"
               >
                 <ZoomIn size={14} />
               </button>
               <button
                 onClick={zoomOut}
-                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-660 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                 title="Zoom Out"
               >
                 <ZoomOut size={14} />
               </button>
               <button
                 onClick={resetLayout}
-                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-660 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                 title="Reset View"
               >
                 <RefreshCw size={14} />
@@ -406,7 +415,7 @@ export const KnowledgeGraph: React.FC = () => {
         {/* Selected node detail sidecard info */}
         <div className="flex flex-col gap-6">
           <GlassCard className="p-5 flex-1">
-            <h3 className="text-xs font-bold text-slate-850 dark:text-white uppercase tracking-wider mb-4">Node Metadata</h3>
+            <h3 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-4">Node Metadata</h3>
             
             {selectedNode ? (
               <div className="space-y-4">

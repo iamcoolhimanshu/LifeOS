@@ -283,7 +283,7 @@ export const Settings: React.FC = () => {
                 className={`w-full text-left py-3 px-4 rounded-xl text-xs font-bold transition flex items-center gap-3 ${
                   active 
                     ? 'bg-slate-200/60 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-cyberBlue' 
-                    : 'text-slate-500 hover:text-slate-750 dark:hover:text-slate-355 hover:bg-slate-200/30 dark:hover:bg-slate-950/20'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/30 dark:hover:bg-slate-950/20'
                 }`}
               >
                 <Icon size={16} />

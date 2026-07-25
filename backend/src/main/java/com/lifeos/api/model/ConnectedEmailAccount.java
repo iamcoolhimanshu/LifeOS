@@ -1,10 +1,12 @@
 package com.lifeos.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "connected_email_accounts")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConnectedEmailAccount {
 
     @Id

@@ -52,29 +52,35 @@ public class SystemEmailService {
             String activeFromAddress = this.fromAddress;
             String activeFromName = this.fromName;
 
+            com.lifeos.api.model.UserConfiguration config = null;
             if (user != null) {
-                java.util.Optional<com.lifeos.api.model.UserConfiguration> configOpt = userConfigurationRepository.findByUser(user);
-                if (configOpt.isPresent()) {
-                    com.lifeos.api.model.UserConfiguration config = configOpt.get();
-                    if (config.getSmtpHost() != null && !config.getSmtpHost().trim().isEmpty()) {
-                        org.springframework.mail.javamail.JavaMailSenderImpl customSender = new org.springframework.mail.javamail.JavaMailSenderImpl();
-                        customSender.setHost(config.getSmtpHost());
-                        customSender.setPort(config.getSmtpPort() != null ? config.getSmtpPort() : 587);
-                        customSender.setUsername(config.getSmtpUsername());
-                        customSender.setPassword(encryptionService.decrypt(config.getEncryptedSmtpPassword()));
-                        
-                        java.util.Properties props = customSender.getJavaMailProperties();
-                        props.put("mail.transport.protocol", "smtp");
-                        props.put("mail.smtp.auth", "true");
-                        props.put("mail.smtp.starttls.enable", "true");
-                        props.put("mail.debug", "false");
-
-                        activeSender = customSender;
-                        activeFromAddress = config.getSmtpFromAddress() != null ? config.getSmtpFromAddress() : config.getSmtpUsername();
-                        activeFromName = config.getSmtpFromName() != null ? config.getSmtpFromName() : activeFromName;
-                        logger.info("Using dynamic UserConfiguration SMTP settings for user: {}", user.getUsername());
-                    }
+                config = userConfigurationRepository.findByUser(user).orElse(null);
+            } else {
+                java.util.List<com.lifeos.api.model.UserConfiguration> configs = userConfigurationRepository.findAll();
+                if (!configs.isEmpty()) {
+                    config = configs.get(0);
                 }
+            }
+
+            if (config != null && config.getSmtpHost() != null && !config.getSmtpHost().trim().isEmpty()) {
+                org.springframework.mail.javamail.JavaMailSenderImpl customSender = new org.springframework.mail.javamail.JavaMailSenderImpl();
+                customSender.setHost(config.getSmtpHost());
+                customSender.setPort(config.getSmtpPort() != null ? config.getSmtpPort() : 587);
+                customSender.setUsername(config.getSmtpUsername());
+                if (config.getEncryptedSmtpPassword() != null) {
+                    customSender.setPassword(encryptionService.decrypt(config.getEncryptedSmtpPassword()));
+                }
+                
+                java.util.Properties props = customSender.getJavaMailProperties();
+                props.put("mail.transport.protocol", "smtp");
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.starttls.enable", "true");
+                props.put("mail.debug", "false");
+
+                activeSender = customSender;
+                activeFromAddress = config.getSmtpFromAddress() != null ? config.getSmtpFromAddress() : config.getSmtpUsername();
+                activeFromName = config.getSmtpFromName() != null ? config.getSmtpFromName() : activeFromName;
+                logger.info("Using dynamic UserConfiguration SMTP settings from Configuration Vault");
             }
 
             if (activeSender == null) {

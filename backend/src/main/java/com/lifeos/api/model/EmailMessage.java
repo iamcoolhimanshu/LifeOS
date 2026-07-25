@@ -1,5 +1,6 @@
 package com.lifeos.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 @Table(name = "email_messages", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"connected_account_id", "provider_message_id"})
 })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class EmailMessage {
 
     @Id
