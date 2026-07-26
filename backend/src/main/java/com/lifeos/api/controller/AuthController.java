@@ -51,7 +51,8 @@ public class AuthController {
             
             return ResponseEntity.ok(jwtResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(new MessageResponse("Error: Unauthorized. Invalid username or password."));
+            String errorMsg = (e.getMessage() != null && !e.getMessage().isBlank()) ? e.getMessage() : "Error: Unauthorized. Invalid username or password.";
+            return ResponseEntity.status(401).body(new MessageResponse(errorMsg));
         }
     }
 

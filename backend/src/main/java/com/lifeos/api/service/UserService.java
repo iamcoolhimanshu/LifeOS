@@ -73,36 +73,24 @@ public class UserService {
             throw new RuntimeException("Error: Email is already in use!");
         }
 
-        // Create new user's account
+        // Create new user's account with auto-verified status for instant signin
         User user = new User(
                 signupRequest.getUsername(),
                 signupRequest.getEmail(),
                 encoder.encode(signupRequest.getPassword()),
                 Role.USER
         );
+        user.setEmailVerified(true);
+        user.setEmailVerifiedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(user);
 
-        // Generate verification token
-        String rawToken = generateSecureToken();
-        String tokenHash = hashToken(rawToken);
-
-        EmailVerificationToken verificationToken = new EmailVerificationToken(
-                savedUser,
-                tokenHash,
-                LocalDateTime.now().plusHours(24)
-        );
-        emailVerificationTokenRepository.save(verificationToken);
-
-        // Send Welcome & Verification Email
-        Map<String, String> variables = new HashMap<>();
-        variables.put("title", "Verify Your LifeOS Account");
-        variables.put("username", savedUser.getUsername());
-        variables.put("content", "Welcome to LifeOS! To finalize your account setup, please verify your email address by clicking the button below. This link will expire in 24 hours.");
-        variables.put("link", "http://localhost:5173/verify-email?token=" + rawToken);
-        variables.put("linkText", "Verify Email Address");
-        
-        systemEmailService.sendEmail(savedUser, savedUser.getEmail(), "Verify your LifeOS Account", "email_verification", variables);
+        // Seed default workspace data (notes, goals, calendar, career, finance)
+        try {
+            databaseSeedingService.seedUserData(savedUser);
+        } catch (Exception e) {
+            logger.warn("Could not seed initial user workspace data: {}", e.getMessage());
+        }
 
         return savedUser;
     }
@@ -115,8 +103,11 @@ public class UserService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userRepository.findById(userDetails.getId()).get();
 
-        if (Boolean.FALSE.equals(user.getEmailVerified())) {
-            throw new RuntimeException("Error: Email address not verified. Please verify your email first.");
+        // Auto-verify email if not verified yet to allow instant login
+        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+            user.setEmailVerified(true);
+            user.setEmailVerifiedAt(LocalDateTime.now());
+            userRepository.save(user);
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
