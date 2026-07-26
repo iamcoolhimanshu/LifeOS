@@ -11,7 +11,7 @@
 
   <p align="center">
     <a href="https://lifeos-frontend-qxsy.onrender.com/"><strong>🚀 View Live Application</strong></a> ·
-    <a href="https://lifeos-backend-sh92.onrender.com/api/test/ping"><strong>⚡ Live API Endpoint</strong></a> ·
+    <a href="https://dashboard.render.com/web/srv-d9iu9bnaqgkc73amdnl0"><strong>⚡ Live API Endpoint</strong></a> ·
     <a href="https://github.com/iamcoolhimanshu/LifeOS"><strong>🐙 GitHub Repository</strong></a>
   </p>
 
