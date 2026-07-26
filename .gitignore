@@ -70,3 +70,7 @@ application-local.yml
 # Keep specific assets if needed, but in general binary media files uploaded to the app should be ignored
 !frontend/src/assets/**
 
+# --- SQL Dumps ---
+*.sql
+
+
