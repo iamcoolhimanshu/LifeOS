@@ -76,9 +76,7 @@ export const useAuthStore = create<AuthState>((set) => {
       } catch (e) {
         // Safe to ignore, clean session storage anyway
       } finally {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('refreshToken');
-        sessionStorage.removeItem('user');
+        sessionStorage.clear();
         set({
           user: null,
           token: null,

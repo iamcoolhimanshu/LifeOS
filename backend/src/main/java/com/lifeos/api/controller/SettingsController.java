@@ -36,13 +36,7 @@ public class SettingsController {
 
     private void initializeMockDataIfAbsent(Long userId) {
         if (!aiMemoriesStore.containsKey(userId)) {
-            List<String> memories = new ArrayList<>(Arrays.asList(
-                "Himanshu prefers a curated Light Mode theme interface",
-                "Himanshu works as a Software Engineer utilizing Java and React stacks",
-                "Himanshu tracks AWS compute monthly subscription bills in Finance logs",
-                "Himanshu schedules team standups on Wednesday mornings"
-            ));
-            aiMemoriesStore.put(userId, memories);
+            aiMemoriesStore.put(userId, new ArrayList<>());
         }
 
         if (!activeDevicesStore.containsKey(userId)) {
@@ -50,24 +44,10 @@ public class SettingsController {
             
             Map<String, String> dev1 = new HashMap<>();
             dev1.put("id", "dev_1");
-            dev1.put("name", "Windows Desktop Client (Current)");
-            dev1.put("ip", "192.168.1.45");
+            dev1.put("name", "Current Session");
+            dev1.put("ip", "127.0.0.1");
             dev1.put("lastActive", "Active now");
             devices.add(dev1);
-
-            Map<String, String> dev2 = new HashMap<>();
-            dev2.put("id", "dev_2");
-            dev2.put("name", "iPhone 15 Pro Max Mobile");
-            dev2.put("ip", "10.0.0.8");
-            dev2.put("lastActive", "12 hours ago");
-            devices.add(dev2);
-
-            Map<String, String> dev3 = new HashMap<>();
-            dev3.put("id", "dev_3");
-            dev3.put("name", "Chrome Browser Clipper Extension");
-            dev3.put("ip", "192.168.1.45");
-            dev3.put("lastActive", "3 days ago");
-            devices.add(dev3);
 
             activeDevicesStore.put(userId, devices);
         }

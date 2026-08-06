@@ -84,23 +84,21 @@ public class AnalyticsController {
                     }
                 }
             }
-            if (count == 0) {
-                // mock some base values if no logs recorded to make graph look interesting
-                count = (long) (Math.abs(date.hashCode() % 3) + 1);
-            }
-
             Map<String, Object> point = new HashMap<>();
             point.put("day", label);
             point.put("count", count);
             noteVelocity.add(point);
         }
 
-        // 5. Weekly Productivity Score trend
+        // 5. Weekly Productivity Score trend (calculated from user's daily activity logs)
         List<Integer> productivityTrend = new ArrayList<>();
         for (int i = 6; i >= 0; i--) {
-            // Simulated productivity score trend based on log actions over previous days
-            int base = 60 + (i * 3) + (Math.abs(today.minusDays(i).hashCode() % 15));
-            productivityTrend.add(Math.min(100, base));
+            java.time.LocalDate date = today.minusDays(i);
+            long dayActions = logs.stream()
+                    .filter(l -> l.getCreatedAt() != null && l.getCreatedAt().toLocalDate().equals(date))
+                    .count();
+            int scoreOnDate = dayActions > 0 ? Math.min(100, (int) (40 + dayActions * 15)) : 0;
+            productivityTrend.add(scoreOnDate);
         }
 
         // Aggregate statistics

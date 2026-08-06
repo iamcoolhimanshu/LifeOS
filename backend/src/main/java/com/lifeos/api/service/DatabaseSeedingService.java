@@ -54,6 +54,9 @@ public class DatabaseSeedingService {
 
     @Transactional
     public void seedUserData(User user) {
+        // Disabled seeding so new user accounts start completely fresh with 0 items
+        if (true) return;
+
         // 1. Seed Notes (which will also trigger Task extraction automatically!)
         if (noteRepository.findByUserAndArchivedFalseOrderByPinnedDescUpdatedAtDesc(user).isEmpty()) {
             noteService.createNote(

@@ -97,7 +97,10 @@ public class DashboardController {
     }
 
     private int calculateProductivityScore(List<ActivityLog> logs) {
-        int score = 40; // Base score
+        if (logs == null || logs.isEmpty()) {
+            return 0;
+        }
+        int score = 40; // Base score for active user
         int noteCreates = 0;
         int noteUpdates = 0;
         int docUploads = 0;
@@ -113,9 +116,7 @@ public class DashboardController {
         score += Math.min(noteCreates, 3) * 5;
         score += Math.min(noteUpdates, 3) * 5;
         score += Math.min(docUploads, 2) * 10;
-        if (!logs.isEmpty()) {
-            score += 10; // Logged activity boost
-        }
+        score += 10; // Logged activity boost
 
         return Math.min(100, score);
     }

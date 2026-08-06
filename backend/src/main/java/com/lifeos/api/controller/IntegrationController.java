@@ -102,7 +102,7 @@ public class IntegrationController {
             noteService.createNote(
                 user,
                 "[Gmail] Subscription Renewal Invoice",
-                "Hi Himanshu,\n\nYour subscription invoice for Amazon AWS compute instances has been processed.\nTotal charged: $154.00 USD.",
+                "Hi " + user.getUsername() + ",\n\nYour subscription invoice for Amazon AWS compute instances has been processed.\nTotal charged: $154.00 USD.",
                 "Finance",
                 "gmail,invoice,aws"
             );

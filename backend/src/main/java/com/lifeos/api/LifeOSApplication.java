@@ -24,7 +24,6 @@ public class LifeOSApplication {
                     user.setEmailVerifiedAt(java.time.LocalDateTime.now());
                     userRepository.save(user);
                 }
-                databaseSeedingService.seedUserData(user);
             });
         };
     }
