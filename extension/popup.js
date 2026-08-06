@@ -12,7 +12,64 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.getElementById('saveBtn');
   const statusMsg = document.getElementById('statusMessage');
 
-  // Initialize view state
+  // Server Settings UI Elements
+  const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+  const settingsPanel = document.getElementById('settingsPanel');
+  const serverUrlInput = document.getElementById('serverUrlInput');
+  const activeServerBadge = document.getElementById('activeServerBadge');
+  const saveServerUrlBtn = document.getElementById('saveServerUrlBtn');
+  const presetProdBtn = document.getElementById('presetProdBtn');
+  const presetLocalBtn = document.getElementById('presetLocalBtn');
+
+  const DEFAULT_PROD_URL = 'https://lifeos-backend-qxsy.onrender.com';
+  const DEFAULT_LOCAL_URL = 'http://localhost:8080';
+
+  // Helper to get normalized server URL (strip trailing slashes)
+  function getServerUrl() {
+    let url = localStorage.getItem('lifeos_server_url') || DEFAULT_PROD_URL;
+    return url.replace(/\/+$/, '');
+  }
+
+  // Update server URL UI display
+  function updateServerBadge() {
+    const currentUrl = getServerUrl();
+    activeServerBadge.textContent = `Server: ${currentUrl}`;
+    serverUrlInput.value = currentUrl;
+  }
+
+  // Toggle settings panel
+  toggleSettingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('active');
+  });
+
+  // Save server URL button
+  saveServerUrlBtn.addEventListener('click', () => {
+    let inputUrl = serverUrlInput.value.trim();
+    if (!inputUrl) {
+      inputUrl = DEFAULT_PROD_URL;
+    }
+    // Ensure protocol prefix
+    if (!/^https?:\/\//i.test(inputUrl)) {
+      inputUrl = 'https://' + inputUrl;
+    }
+    inputUrl = inputUrl.replace(/\/+$/, '');
+    localStorage.setItem('lifeos_server_url', inputUrl);
+    updateServerBadge();
+    settingsPanel.classList.remove('active');
+    showStatus(`Server URL updated to: ${inputUrl}`, 'success');
+  });
+
+  // Preset buttons
+  presetProdBtn.addEventListener('click', () => {
+    serverUrlInput.value = DEFAULT_PROD_URL;
+  });
+
+  presetLocalBtn.addEventListener('click', () => {
+    serverUrlInput.value = DEFAULT_LOCAL_URL;
+  });
+
+  // Initial load
+  updateServerBadge();
   updateViewState();
 
   // Switch views and fetch data based on authorization state
@@ -52,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loginBtn.addEventListener('click', async () => {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
+    const serverUrl = getServerUrl();
 
     if (!username) {
       showStatus('Please enter your username.', 'error');
@@ -62,10 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    showStatus('Logging in...', '');
+    showStatus(`Connecting to ${serverUrl}...`, '');
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/signin', {
+      const response = await fetch(`${serverUrl}/api/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -103,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showStatus(errorData.message || `Login failed. Status: ${response.status}`, 'error');
       }
     } catch (err) {
-      showStatus('Failed to connect to LifeOS server. Make sure the backend is running at http://localhost:8080.', 'error');
+      showStatus(`Failed to connect to LifeOS server at ${serverUrl}. Check your internet connection or server settings (⚙️).`, 'error');
     }
   });
 
@@ -121,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('lifeos_clipper_token');
     const title = titleInput.value.trim();
     const content = contentInput.value.trim();
+    const serverUrl = getServerUrl();
 
     if (!token) {
       showStatus('Session expired. Please log in again.', 'error');
@@ -135,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showStatus('Saving web clip...', '');
 
     try {
-      const response = await fetch('http://localhost:8080/api/notes', {
+      const response = await fetch(`${serverUrl}/api/notes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showStatus(errorData.message || `Error saving note. Status: ${response.status}`, 'error');
       }
     } catch (err) {
-      showStatus('Failed to connect to LifeOS server. Make sure the backend is running at http://localhost:8080.', 'error');
+      showStatus(`Failed to connect to LifeOS server at ${serverUrl}. Check your internet connection or server settings (⚙️).`, 'error');
     }
   });
 
@@ -175,9 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
       statusMsg.classList.add(type);
     } else {
       statusMsg.style.display = 'block';
-      statusMsg.style.color = '#3b82f6';
-      statusMsg.style.background = 'rgba(59, 130, 246, 0.1)';
-      statusMsg.style.border = '1px solid rgba(59, 130, 246, 0.2)';
+      statusMsg.style.color = '#06b6d4';
+      statusMsg.style.background = 'rgba(6, 182, 212, 0.1)';
+      statusMsg.style.border = '1px solid rgba(6, 182, 212, 0.2)';
     }
   }
 });
