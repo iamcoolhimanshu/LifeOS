@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <style>
     body {
-      width: 330px;
+      width: 340px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: #090d16;
       color: #e2e8f0;
@@ -25,17 +25,20 @@
       align-items: center;
       gap: 10px;
     }
-    .logo {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
+    .logo-container {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
       background: linear-gradient(135deg, #a855f7, #06b6d4);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-weight: bold;
-      font-size: 14px;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+    }
+    .logo-svg {
+      width: 16px;
+      height: 16px;
+      fill: #ffffff;
     }
     .title {
       font-size: 14px;
@@ -43,12 +46,16 @@
       letter-spacing: 0.5px;
       text-transform: uppercase;
       margin: 0;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .subtitle {
       font-size: 9px;
       color: #06b6d4;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin: 0;
     }
     .gear-btn {
@@ -64,13 +71,14 @@
     .gear-btn:hover {
       color: #06b6d4;
       border-color: #06b6d4;
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
     }
     .settings-panel {
       display: none;
       background: #0f172a;
       border: 1px solid #1e293b;
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 10px;
+      padding: 12px;
       margin-bottom: 12px;
     }
     .settings-panel.active {
@@ -80,11 +88,12 @@
       display: inline-block;
       font-size: 9px;
       font-weight: 700;
-      color: #94a3b8;
-      background: #1e293b;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-bottom: 8px;
+      color: #06b6d4;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 12px;
       word-break: break-all;
     }
     .preset-btns {
@@ -97,11 +106,12 @@
       background: #1e293b;
       color: #cbd5e1;
       border: 1px solid #334155;
-      padding: 4px 6px;
+      padding: 5px 6px;
       font-size: 9px;
       font-weight: bold;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: all 0.15s;
     }
     .btn-preset:hover {
       background: #334155;
@@ -118,7 +128,12 @@
       text-transform: uppercase;
       margin-bottom: 4px;
     }
-    input, textarea {
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    input, textarea, select {
       width: 100%;
       background: #111827;
       border: 1px solid #1f2937;
@@ -127,10 +142,36 @@
       padding: 8px 10px;
       font-size: 12px;
       box-sizing: border-box;
+      transition: border-color 0.2s;
     }
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: #06b6d4;
+    }
+    .password-input {
+      padding-right: 34px;
+    }
+    .eye-toggle-btn {
+      position: absolute;
+      right: 6px;
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .eye-toggle-btn:hover {
+      color: #06b6d4;
+    }
+    .eye-icon {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
     }
     .btn {
       width: 100%;
@@ -143,24 +184,28 @@
       font-size: 12px;
       cursor: pointer;
       margin-top: 8px;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
     }
     .btn:hover {
-      opacity: 0.9;
+      opacity: 0.95;
+      transform: translateY(-1px);
     }
     .btn-secondary {
       background: #1e293b;
       color: #cbd5e1;
       border: 1px solid #334155;
-      margin-top: 6px;
+      margin-top: 8px;
+      box-shadow: none;
     }
     .status {
       display: none;
       font-size: 11px;
       text-align: center;
-      padding: 8px;
+      padding: 10px;
       border-radius: 8px;
       margin-top: 10px;
+      line-height: 1.4;
     }
     .status.success {
       background: rgba(16, 185, 129, 0.1);
@@ -174,12 +219,35 @@
       color: #ef4444;
       display: block;
     }
+    .footer {
+      margin-top: 14px;
+      pt: 10px;
+      border-top: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #64748b;
+    }
+    .footer-link {
+      color: #06b6d4;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .footer-link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="header-brand">
-      <div class="logo">L</div>
+      <div class="logo-container">
+        <!-- LifeOS Brain SVG Icon -->
+        <svg class="logo-svg" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l7 4.5-7 4.5z"/>
+        </svg>
+      </div>
       <div>
         <h1 class="title">LifeOS Clipper</h1>
         <p class="subtitle">AI Second Brain</p>
@@ -190,11 +258,11 @@
 
   <!-- Server Settings Panel -->
   <div class="settings-panel" id="settingsPanel">
-    <label for="serverUrlInput">LifeOS Backend Server URL</label>
-    <input type="text" id="serverUrlInput" placeholder="https://lifeos-backend-qxsy.onrender.com">
+    <label for="serverUrlInput">LifeOS Backend Server API URL</label>
+    <input type="text" id="serverUrlInput" placeholder="http://localhost:8080">
     <div class="preset-btns">
+      <button class="btn-preset" id="presetLocalBtn">Localhost (8080)</button>
       <button class="btn-preset" id="presetProdBtn">Cloud Render</button>
-      <button class="btn-preset" id="presetLocalBtn">Localhost 8080</button>
     </div>
     <button class="btn btn-secondary" id="saveServerUrlBtn">Save Server URL</button>
   </div>
@@ -209,9 +277,17 @@
     </div>
     <div class="field">
       <label for="passwordInput">Password</label>
-      <input type="password" id="passwordInput" placeholder="Enter your password">
+      <div class="input-wrapper">
+        <input type="password" id="passwordInput" class="password-input" placeholder="Enter your password">
+        <button class="eye-toggle-btn" id="togglePasswordBtn" type="button" title="Show/Hide Password">
+          <!-- Eye SVG Icon -->
+          <svg class="eye-icon" id="eyeIcon" viewBox="0 0 24 24">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+          </svg>
+        </button>
+      </div>
     </div>
-    <button class="btn" id="loginBtn">Log In</button>
+    <button class="btn" id="loginBtn">Log In to LifeOS</button>
   </div>
 
   <!-- Clipper View -->
@@ -219,6 +295,17 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 11px; color: #94a3b8; background: #111827; padding: 6px 10px; border-radius: 6px; border: 1px solid #1f2937;">
       <span>Logged in as: <strong id="loggedInUser" style="color: #06b6d4;">User</strong></span>
       <a href="#" id="logoutLink" style="color: #ef4444; text-decoration: none; font-weight: bold; cursor: pointer;">Logout</a>
+    </div>
+
+    <div class="field">
+      <label for="categorySelect">Category</label>
+      <select id="categorySelect">
+        <option value="Clipped" selected>Clipped Web Page</option>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Learning">Learning</option>
+        <option value="Finance">Finance</option>
+      </select>
     </div>
 
     <div class="field">
@@ -231,10 +318,15 @@
       <textarea id="contentInput" rows="4" placeholder="Type content or paste text details here..."></textarea>
     </div>
 
-    <button class="btn" id="saveBtn">Clip to LifeOS</button>
+    <button class="btn" id="saveBtn">Clip to LifeOS Brain</button>
   </div>
   
   <div class="status" id="statusMessage"></div>
+
+  <div class="footer">
+    <span>LifeOS AI Companion v1.2</span>
+    <a href="https://lifeos-frontend-qxsy.onrender.com" target="_blank" class="footer-link">Open Dashboard ↗</a>
+  </div>
 
   <script src="popup.js"></script>
 </body>

@@ -69,6 +69,7 @@ application-local.yml
 *.gif
 # Keep specific assets if needed, but in general binary media files uploaded to the app should be ignored
 !frontend/src/assets/**
+!extension/*.png
 
 # --- SQL Dumps ---
 *.sql
