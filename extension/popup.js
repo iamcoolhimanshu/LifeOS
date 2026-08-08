@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const presetLocalBtn = document.getElementById('presetLocalBtn');
 
   const DEFAULT_LOCAL_URL = 'http://localhost:8080';
-  const DEFAULT_PROD_URL = 'https://lifeos-backend-qxsy.onrender.com'; // or render backend URL
+  const DEFAULT_PROD_URL = 'https://lifeos-backend.onrender.com';
 
   // SVG paths for Eye / Eye-Off icons
   const EYE_OPEN_PATH = 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z';
@@ -43,7 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Get sanitized base URL without trailing slashes or duplicate /api
   function getBaseUrl() {
-    let raw = localStorage.getItem('lifeos_server_url') || DEFAULT_LOCAL_URL;
+    let raw = localStorage.getItem('lifeos_server_url');
+    // Clear stale invalid URL if found
+    if (!raw || raw.includes('lifeos-backend-qxsy.onrender.com')) {
+      raw = DEFAULT_LOCAL_URL;
+      localStorage.setItem('lifeos_server_url', DEFAULT_LOCAL_URL);
+    }
     raw = raw.trim().replace(/\/+$/, '');
     if (raw.endsWith('/api')) {
       raw = raw.substring(0, raw.length - 4).replace(/\/+$/, '');
@@ -58,6 +63,16 @@ document.addEventListener('DOMContentLoaded', () => {
     serverUrlInput.value = currentUrl;
   }
 
+  // Set server URL
+  function setServerUrl(newUrl) {
+    let inputUrl = newUrl.trim().replace(/\/+$/, '');
+    if (inputUrl.endsWith('/api')) {
+      inputUrl = inputUrl.substring(0, inputUrl.length - 4).replace(/\/+$/, '');
+    }
+    localStorage.setItem('lifeos_server_url', inputUrl);
+    updateServerBadge();
+  }
+
   // Toggle settings panel
   toggleSettingsBtn.addEventListener('click', () => {
     settingsPanel.classList.toggle('active');
@@ -69,18 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!inputUrl) {
       inputUrl = DEFAULT_LOCAL_URL;
     }
-    // Ensure protocol prefix
     if (!/^https?:\/\//i.test(inputUrl)) {
       inputUrl = 'http://' + inputUrl;
     }
-    inputUrl = inputUrl.replace(/\/+$/, '');
-    if (inputUrl.endsWith('/api')) {
-      inputUrl = inputUrl.substring(0, inputUrl.length - 4).replace(/\/+$/, '');
-    }
-    localStorage.setItem('lifeos_server_url', inputUrl);
-    updateServerBadge();
+    setServerUrl(inputUrl);
     settingsPanel.classList.remove('active');
-    showStatus(`Server URL saved: ${inputUrl}`, 'success');
+    showStatus(`Server URL saved: ${getBaseUrl()}`, 'success');
   });
 
   // Preset buttons
@@ -133,8 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loginBtn.addEventListener('click', async () => {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
-    const baseUrl = getBaseUrl();
-    const authEndpoint = `${baseUrl}/api/auth/signin`;
+    let baseUrl = getBaseUrl();
 
     if (!username) {
       showStatus('Please enter your username.', 'error');
@@ -147,8 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showStatus(`Connecting to ${baseUrl}...`, '');
 
+    let authEndpoint = `${baseUrl}/api/auth/signin`;
+
     try {
-      const response = await fetch(authEndpoint, {
+      let response = await fetch(authEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -158,6 +168,26 @@ document.addEventListener('DOMContentLoaded', () => {
           password: password
         })
       });
+
+      // If non-localhost gave 404 or connection error, try local backend automatically
+      if (!response.ok && response.status === 404 && baseUrl !== DEFAULT_LOCAL_URL) {
+        showStatus(`404 on ${baseUrl}. Trying Localhost (${DEFAULT_LOCAL_URL})...`, '');
+        try {
+          const localEndpoint = `${DEFAULT_LOCAL_URL}/api/auth/signin`;
+          const localRes = await fetch(localEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          if (localRes.ok) {
+            setServerUrl(DEFAULT_LOCAL_URL);
+            baseUrl = DEFAULT_LOCAL_URL;
+            response = localRes;
+          }
+        } catch (e) {
+          // Keep original response for error handling below
+        }
+      }
 
       if (response.ok) {
         const data = await response.json();
@@ -177,18 +207,60 @@ document.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => {
             statusMsg.style.display = 'none';
             updateViewState();
-          }, 1000);
+          }, 800);
         } else {
           showStatus('Error: Invalid response format from server.', 'error');
         }
       } else if (response.status === 404) {
-        showStatus(`Status 404: Endpoint not found at ${authEndpoint}. Please check Server URL settings (⚙️) points to your Spring Boot API (e.g. http://localhost:8080).`, 'error');
+        showStatusWithAction(
+          `Status 404: Endpoint not found at ${authEndpoint}.`,
+          `Switch to Localhost (http://localhost:8080)`,
+          () => {
+            setServerUrl(DEFAULT_LOCAL_URL);
+            showStatus(`Switched API Server to ${DEFAULT_LOCAL_URL}. Please click Log In.`, 'success');
+          }
+        );
       } else {
         const errorData = await response.json().catch(() => ({}));
         showStatus(errorData.message || `Login failed. Status: ${response.status}`, 'error');
       }
     } catch (err) {
-      showStatus(`Failed to connect to ${baseUrl}. Make sure your backend server is running and CORS is enabled.`, 'error');
+      // If fetching non-localhost failed, auto-fallback test localhost
+      if (baseUrl !== DEFAULT_LOCAL_URL) {
+        try {
+          const localRes = await fetch(`${DEFAULT_LOCAL_URL}/api/auth/signin`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          if (localRes.ok) {
+            const data = await localRes.json();
+            const token = data.accessToken || data.token;
+            if (token) {
+              setServerUrl(DEFAULT_LOCAL_URL);
+              localStorage.setItem('lifeos_clipper_token', token);
+              localStorage.setItem('lifeos_clipper_username', data.username || username);
+              showStatus('Connected & Logged in via Localhost!', 'success');
+              setTimeout(() => {
+                statusMsg.style.display = 'none';
+                updateViewState();
+              }, 800);
+              return;
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      showStatusWithAction(
+        `Failed to connect to ${baseUrl}. Backend is not reachable.`,
+        `Use Localhost (http://localhost:8080)`,
+        () => {
+          setServerUrl(DEFAULT_LOCAL_URL);
+          showStatus(`Switched API Server to ${DEFAULT_LOCAL_URL}. Please click Log In.`, 'success');
+        }
+      );
     }
   });
 
@@ -238,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (response.ok) {
-        showStatus('Web page successfully clipped to LifeOS!', 'success');
+        showStatus('Web page successfully clipped to LifeOS Brain!', 'success');
         contentInput.value = '';
       } else if (response.status === 401 || response.status === 403) {
         localStorage.removeItem('lifeos_clipper_token');
@@ -269,5 +341,22 @@ document.addEventListener('DOMContentLoaded', () => {
       statusMsg.style.background = 'rgba(6, 182, 212, 0.1)';
       statusMsg.style.border = '1px solid rgba(6, 182, 212, 0.2)';
     }
+  }
+
+  function showStatusWithAction(msg, actionText, actionCallback) {
+    statusMsg.innerHTML = '';
+    statusMsg.className = 'status error';
+
+    const textDiv = document.createElement('div');
+    textDiv.textContent = msg;
+    statusMsg.appendChild(textDiv);
+
+    const btn = document.createElement('button');
+    btn.textContent = actionText;
+    btn.style.cssText = 'margin-top: 6px; background: #06b6d4; color: #ffffff; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; display: inline-block;';
+    btn.addEventListener('click', actionCallback);
+    statusMsg.appendChild(btn);
+
+    statusMsg.style.display = 'block';
   }
 });
